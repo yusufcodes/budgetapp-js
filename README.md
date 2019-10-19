@@ -32,3 +32,29 @@ var modulePattern = (function() {
     }
 })();
 ```
+
+### Inserting Elements into the DOM
+
+There are many methods which can achieve this, but once is called **insertAdjacentHTML**. Notes supplemented using [Mozilla Developer Network](https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML)
+
+```javascript
+element.insertAdjacentHTML(position, text);
+
+// Position: The position that the new HTML should be placed, relative to the referenced element.
+
+- 'beforebegin': Before the element itself.
+- 'afterbegin': Just inside the element, before its first child.
+- 'beforeend': Just inside the element, after its last child.
+- 'afterend': After the element itself.
+
+<!-- beforebegin -->
+<p>
+  <!-- afterbegin -->
+  foo
+  <!-- beforeend -->
+</p>
+<!-- afterend -->
+
+// Text: String to be parsed and entered as HTML
+
+```
