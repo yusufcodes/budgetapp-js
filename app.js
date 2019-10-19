@@ -1,35 +1,20 @@
-// IIFE that returns an object containing all public objects
-var budgetController = ( function() {
-    var x = 23;
-    var add = function(a)
-    {
-        return x + a;
-    }
 
-    // Making the following properties publicly accessible
-    return {
-        publicTest: function(b) {
-            return add(b);
-        }
-    }
+// BUDGET CONTROLLER
+var budgetController = ( function() {
 
 } )();
 
+
+// UI CONTROLLER
 var UIController = ( function() 
 {
 
 } )();
 
+
+// GLOBAL APP CONTROLLER
 var controller = ( function(budgetCtrl, UICtrl) 
 {
-    var z = budgetCtrl.publicTest(5);
 
-    return {
-        publicTwo: function() {
-            console.log(z);
-        }
-    }
     
 } )(budgetController, UIController);
-
-controller.publicTwo();
