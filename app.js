@@ -2,6 +2,7 @@
 // BUDGET CONTROLLER
 var budgetController = ( function() {
 
+    // Data Structures to store an Expense or Income
     var Expense = function(id, description, value)
     {
         this.id = id;
@@ -16,6 +17,7 @@ var budgetController = ( function() {
         this.value = value;
     };
 
+    // Expenses and values stored within 'data'
     var data = {
         allItems: {
             exp: [],
@@ -28,12 +30,55 @@ var budgetController = ( function() {
         }
     };
 
+    return {
+        // addItem: Using the input values supplied, a new expense is created and added to the data structure
+        addItems: function(type, desc, val)
+        {
+            var newItem, id;
+
+            // Create a new ID
+            if (data.allItems[type].length > 0)
+            {
+                id = (data.allItems[type][data.allItems[type].length - 1].id) + 1;
+            }
+            else
+            {
+                id = 0;
+            }
+
+            // Create a new item depending on the type, inc or exp
+            if (type === 'exp')
+            {
+                newItem = new Expense(id, desc, val);
+            }
+
+            else if (type === 'inc')
+            {
+                newItem = new Income(id, desc, val);
+            }
+
+            // Add element to data structure
+            data.allItems[type].push(newItem);
+
+            // Return the new item that is created
+            return newItem;
+        },
+
+        // testing: displays the data structure
+        testing: function()
+        {
+            console.log(data);
+        }
+
+    }
 } )();
 
 
 // UI CONTROLLER
 var UIController = ( function() 
 {
+    /* DOMStrings: Contains all of the element selector strings, keeping them in once place
+    allows for any changes to be made without having to make changes in multiple places */
     var DOMstrings = {
         inputType: '.add__type',
         inputDescription: '.add__description',
@@ -43,6 +88,7 @@ var UIController = ( function()
     };
 
     return {
+        // getInput: Retrieves the input from the user for their expense
         getInput: function()
         {
             return {
@@ -52,6 +98,7 @@ var UIController = ( function()
             }
         },
 
+        // getDOMStrings: Returns the DOMStrings to be used elsewhere in the application
         getDOMstrings: function()
         {
             return DOMstrings;
@@ -63,6 +110,7 @@ var UIController = ( function()
 // GLOBAL APP CONTROLLER
 var controller = ( function(budgetCtrl, UICtrl) 
 {
+    // setupEventListeners: Event Listeners are setup and added in this method
     var setupEventListeners = function() 
     {
         var DOM = UICtrl.getDOMstrings();
@@ -77,12 +125,15 @@ var controller = ( function(budgetCtrl, UICtrl)
         });
     };
 
+    // ctrlAddItem: The main controller method facilitating the addition of an item to the application
     var ctrlAddItem = function() 
     {
+        var input, newItem;
         // Get the values from the input fields
-        var input = UICtrl.getInput();
+        input = UICtrl.getInput();
 
         // Add the values to the budget controller
+        newItem = budgetCtrl.addItems(input.type, input.description, input.value);
 
         // Add the value to the UI - display it from the data structure
 
