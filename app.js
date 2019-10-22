@@ -17,6 +17,15 @@ var budgetController = ( function() {
         this.value = value;
     };
 
+    var calculateTotal = function(type)
+    {
+        var sum = 0;
+        data.allItems[type].forEach(function(cur) {
+            sum += cur.value;
+        });
+        data.totals[type] = sum;
+
+    };
     // Expenses and values stored within 'data'
     var data = {
         allItems: {
@@ -27,7 +36,10 @@ var budgetController = ( function() {
         totals: {
             exp: 0,
             inc: 0
-        }
+        },
+
+        budget: 0,
+        percentage: -1
     };
 
     return {
@@ -64,6 +76,19 @@ var budgetController = ( function() {
             return newItem;
         },
 
+        calculateBudget: function() 
+        {
+            // Calculate total income and expenses
+            calculateTotal('exp');
+            calculateTotal('inc');
+
+            // Calculate budget: income subtract expenses
+            data.budget = data.totals.inc - data.totals.exp;
+
+            // Calculate the % of income that is spent
+            data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+        },
+
         // testing: displays the data structure
         testing: function()
         {
@@ -96,7 +121,8 @@ var UIController = ( function()
             return {
                 type: document.querySelector(DOMstrings.inputType).value, // inc or exp
                 description: document.querySelector(DOMstrings.inputDescription).value,
-                value: document.querySelector(DOMstrings.inputValue).value
+                // String -> Float
+                value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
             }
         },
 
@@ -167,6 +193,15 @@ var controller = ( function(budgetCtrl, UICtrl)
         });
     };
 
+    var updateBudget = function() 
+    {
+        // Calculate the budget
+
+        // Return the budget
+
+        // Display the budget in the UI
+    }
+
     // ctrlAddItem: The main controller method facilitating the addition of an item to the application
     var ctrlAddItem = function() 
     {
@@ -174,20 +209,21 @@ var controller = ( function(budgetCtrl, UICtrl)
         // Get the values from the input fields
         input = UICtrl.getInput();
 
-        // Add the values to the budget controller
-        newItem = budgetCtrl.addItems(input.type, input.description, input.value);
+        // Sanity check: making sure there is actual data that has been entered before processing
+        if (input.description !== null && !isNaN(input.value) && input.value > 0)
+        {
+            // Add the values to the budget controller
+            newItem = budgetCtrl.addItems(input.type, input.description, input.value);
 
-        // Add the value to the UI - display it from the data structure
-        UICtrl.addListItem(newItem, input.type);
+            // Add the value to the UI - display it from the data structure
+            UICtrl.addListItem(newItem, input.type);
 
-        // Clear the UI fields once the user has submitted expense
-        UICtrl.clearFields();
+            // Clear the UI fields once the user has submitted expense
+            UICtrl.clearFields();
 
-        // Calculate the budget 
-
-        // Display the budget
-
-        
+            // Calculate the budget + display the budget
+            updateBudget();
+        }
     };
 
     return {
