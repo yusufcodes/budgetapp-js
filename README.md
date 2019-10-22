@@ -56,5 +56,28 @@ element.insertAdjacentHTML(position, text);
 <!-- afterend -->
 
 // Text: String to be parsed and entered as HTML
-
 ```
+
+### Array - forEach method
+
+Below shows how to use the forEach method on a given array.
+
+```javascript
+var array1 = ['a', 'b', 'c'];
+
+// You call the forEach method on the array itself, and then pass in an anonymous function (callback) to be executed with the forEach method.
+
+/* PARAMETERS:
+'current' [REQUIRED]: The current element currently selected in the loop.
+
+Optional parameters:
+'index': The current element's index (e.g. 0);
+'array': The actual array being iterated over;
+'thisArg': Ability to set the 'this' variable within the callback function.
+*/
+array1.forEach(function ()
+{
+    // Code
+});
+```
+
