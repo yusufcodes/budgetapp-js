@@ -86,7 +86,20 @@ var budgetController = ( function() {
             data.budget = data.totals.inc - data.totals.exp;
 
             // Calculate the % of income that is spent
-            data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+            if (data.totals.inc > 0)
+            {
+                data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+            }
+        },
+
+        getBudget: function() 
+        {
+            return {
+                budget: data.budget,
+                totalInc: data.totals.inc,
+                totalExp: data.totals.exp,
+                percentage: data.percentage
+            }
         },
 
         // testing: displays the data structure
@@ -196,10 +209,14 @@ var controller = ( function(budgetCtrl, UICtrl)
     var updateBudget = function() 
     {
         // Calculate the budget
+        // TODO: Use calculateBudget method here
+        budgetCtrl.calculateBudget();
 
         // Return the budget
+        var budget = budgetCtrl.getBudget();
 
         // Display the budget in the UI
+        console.log(budget);
     }
 
     // ctrlAddItem: The main controller method facilitating the addition of an item to the application
