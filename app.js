@@ -8,7 +8,26 @@ var budgetController = ( function() {
         this.id = id;
         this.description = description;
         this.value = value;
+        this.percentage = -1;
     };
+
+    Expense.prototype.calcPercentage = function(totalIncome)
+    {
+        if (totalIncome > 0)
+        {
+            this.percentage = Math.round((this.value / totalIncome) * 100);
+        }
+        else
+        {
+            this.percentage = -1;
+        }
+    }
+
+    Expense.prototype.getPercentage = function()
+    {
+        return this.percentage;
+    }
+
 
     var Income = function(id, description, value)
     {
@@ -113,6 +132,22 @@ var budgetController = ( function() {
             {
                 data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
             }
+        },
+
+        calculatePercentages: function() 
+        {
+            data.allItems.exp.forEach(function(cur){
+                cur.calcPercentage(data.totals.inc);
+            });
+        },
+
+        getPercentages: function() 
+        {
+            var allPerc = data.allItems.exp.map(function(cur){
+                return cur.getPercentage();
+            });
+
+            return allPerc;
         },
 
         getBudget: function() 
@@ -272,7 +307,19 @@ var controller = ( function(budgetCtrl, UICtrl)
 
         // Display the budget in the UI
         UICtrl.displayBudget(budget);
-    }
+    };
+
+    var updatePercentages = function() 
+    {
+        // Calculate the percentages
+        budgetCtrl.calculatePercentages();
+
+        // Read the percentage from the budget controller
+        var percentages = budgetCtrl.getPercentages();
+
+        // Update the UI
+        console.log(percentages);
+    };
 
     // ctrlAddItem: The main controller method facilitating the addition of an item to the application
     var ctrlAddItem = function() 
@@ -295,6 +342,8 @@ var controller = ( function(budgetCtrl, UICtrl)
 
             // Calculate the budget + display the budget
             updateBudget();
+
+            updatePercentages();
         }
     };
 
@@ -318,6 +367,8 @@ var controller = ( function(budgetCtrl, UICtrl)
 
             // Update and show the new budget
             updateBudget();
+
+            updatePercentages();
         }
     }
 
