@@ -191,6 +191,12 @@ var UIController = ( function()
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
         },
 
+        deleteListItem: function(selectorID)
+        {
+            var el = document.getElementById(selectorID);
+            el.parentNode.removeChild(el);
+        },
+
         clearFields: function()
         {
             var fields = document.querySelectorAll(DOMstrings.inputDescription + ',' + DOMstrings.inputValue);
@@ -259,7 +265,6 @@ var controller = ( function(budgetCtrl, UICtrl)
     var updateBudget = function() 
     {
         // Calculate the budget
-        // TODO: Use calculateBudget method here
         budgetCtrl.calculateBudget();
 
         // Return the budget
@@ -309,8 +314,10 @@ var controller = ( function(budgetCtrl, UICtrl)
             budgetCtrl.deleteItem(type, id);
 
             // Delete item from user interface
+            UICtrl.deleteListItem(itemID);
 
             // Update and show the new budget
+            updateBudget();
         }
     }
 
