@@ -1,8 +1,7 @@
-
 // BUDGET CONTROLLER
 var budgetController = ( function() {
 
-    // Data Structures to store an Expense or Income
+    // Expense object: stores money that is spent, entered by the user
     var Expense = function(id, description, value)
     {
         this.id = id;
@@ -11,6 +10,7 @@ var budgetController = ( function() {
         this.percentage = -1;
     };
 
+    // calcPercentage: Determine the percentage of income that this expense is using
     Expense.prototype.calcPercentage = function(totalIncome)
     {
         if (totalIncome > 0)
@@ -23,12 +23,13 @@ var budgetController = ( function() {
         }
     }
 
+    // getPercentage: Getter method for the 'percentage' property of the Expense object
     Expense.prototype.getPercentage = function()
     {
         return this.percentage;
     }
 
-
+    // Income object: stores money that is received, entered by the user
     var Income = function(id, description, value)
     {
         this.id = id;
@@ -36,6 +37,10 @@ var budgetController = ( function() {
         this.value = value;
     };
 
+    /* Name: calculateTotal
+       Params: type: The type of income (inc or exp), a string
+       Return: None
+    */
     var calculateTotal = function(type)
     {
         var sum = 0;
@@ -45,24 +50,38 @@ var budgetController = ( function() {
         data.totals[type] = sum;
 
     };
-    // Expenses and values stored within 'data'
+
+    // Data: Object data structure storing values relating to all expenses and income values
     var data = {
+
+        // allItems: Stores the individual incomes and expenses entered by the user
         allItems: {
             exp: [],
             inc: []
         },
 
+        // Totals: Stores the total value for the Expenses and Incomes
         totals: {
             exp: 0,
             inc: 0
         },
 
+        // budget: Calculation of total income - total expenses to show the remaining budget for the user
+        // percentage: Percentage of income spent so far
         budget: 0,
         percentage: -1
     };
 
     return {
-        // addItem: Using the input values supplied, a new expense is created and added to the data structure
+        /* Name: addItems - add an expense/income to the internal data structure
+        Params:
+        - type: The type of income (inc or exp), a string
+        - desc: The description of the expense entered by the user
+        - val: The total of the expense entered by the user
+        Return: 
+        - newItem: Object, type Expense or Income
+        */
+        
         addItems: function(type, desc, val)
         {
             var newItem, id;
@@ -95,6 +114,13 @@ var budgetController = ( function() {
             return newItem;
         },
 
+        /* Name: deleteItem - remove an expense entered by the user
+        Params:
+        - type: The type of income (inc or exp), a String
+        - id: The specific ID of the income to remove
+        Return: 
+        - newItem: None
+        */
         deleteItem: function(type, id)
         {
             var ids, index;
@@ -118,6 +144,11 @@ var budgetController = ( function() {
             }
         },
 
+        /* Name: calculateBudget: Gets the total incomes and expenses and calculates the difference to
+        retrieve the budget.
+        Params: None
+        Return: None
+        */
         calculateBudget: function() 
         {
             // Calculate total income and expenses
@@ -134,6 +165,11 @@ var budgetController = ( function() {
             }
         },
 
+        /* Name: calculatePercentages: Iterates over each expense to calculate the individual
+        percentages entered by the user, using the calcPercentage method
+        Params: None
+        Return: None
+        */
         calculatePercentages: function() 
         {
             data.allItems.exp.forEach(function(cur){
@@ -141,6 +177,12 @@ var budgetController = ( function() {
             });
         },
 
+        /* Name: getPercentages: Getter method to retrieve the individual percentage of each expense
+        Params: None
+        Return: 
+        - allPerc: An array constructed using the map method, storing each percentage value for the individual
+        expenses
+        */
         getPercentages: function() 
         {
             var allPerc = data.allItems.exp.map(function(cur){
@@ -150,6 +192,14 @@ var budgetController = ( function() {
             return allPerc;
         },
 
+        /* Name: getBudget: Getter method to return private values
+        Params: None
+        Return: Object storing the following:
+        - budget: The total budget 
+        - totalInc: Total value of incomes
+        - totalExp: Total value of expenses
+        - percentage: Percentage of the budget spent
+        */
         getBudget: function() 
         {
             return {
@@ -159,16 +209,9 @@ var budgetController = ( function() {
                 percentage: data.percentage
             }
         },
-
-        // testing: displays the data structure
-        testing: function()
-        {
-            console.log(data);
-        }
-
     }
 } )();
-
+// END OF BUDGET CONTROLLER
 
 // UI CONTROLLER
 var UIController = ( function() 
@@ -189,38 +232,56 @@ var UIController = ( function()
         container: '.container',
         expensesPercLabel: '.item__percentage',
         dateLabel: '.budget__title--month'
-
     };
 
+    /* Name: formatNumber: Formats an input value to produce a number which represents an income,
+    Example: 1000 -> + 1,000 for an income of £1,000
+             25000 -> - 25,000 for an expense of £25,000
+    Params:
+    - num: (String) The number to be formatted
+    - type: The type (inc or exp) of value being formatted
+    Return: String with the formatted value, prepended with + / - depending on if it is an Income / Expense
+    */
     var formatNumber = function(num, type)
     {
-        var numSplit, int, dec, type, sign;
-        /*
-        + / - before number
-        Two decimal points
-        Comma separating thousands 
-        */
+        var numSplit, int, dec, type;
 
+        // Takes the absolute value of the number passed in and rounds it to 2 decimal places
         num = Math.abs(num);
         num = num.toFixed(2);
 
+        // numSplit - an array containing the parts of the number passed in, split at any '.'
         numSplit = num.split('.');
 
+        // Integer part of the number
         int = numSplit[0];
 
+        // String manipulation to place comma in position to represent money value 
         // 1000 -> 1,000
+        // 25000 -> 25,000
         if (int.length > 3)
         {
             int = int.substr(0, int.length-3) + ',' + int.substr(int.length-3, 3);
         }
 
+        // Decimal part of the number
         dec = numSplit[1];
 
         return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
     };
 
+    /* Name: nodeListForEach: A custom forEach method for the nodeList, returned when retrieving 
+    HTML DOM elements. This is created because there is no built in forEach methods, so this replicates it 
+    for the purpose of this application.
+    Params:
+    - list: The nodeList to perform operations on
+    - callback: The method to be called on each element in the nodeList
+    Return: None
+    */
     var nodeListForEach = function(list, callback)
     {
+        /* The following for loop will iterate over each element of the nodeList and perform 
+        the desired operation, which is performed by the callback function */
         for (var i = 0; i < list.length; i++)
         {
             callback(list[i], i);
@@ -228,7 +289,13 @@ var UIController = ( function()
     };
 
     return {
-        // getInput: Retrieves the input from the user for their expense
+        /* Name: getInput: Retrieve the inputs from the fields entered by the user
+        Params: None
+        Return:
+        - type: The type of expense entered by the user (inc or exp)
+        - description: The description entered by the user
+        - value: The cost of the expense entered by the user
+        */
         getInput: function()
         {
             return {
@@ -239,9 +306,16 @@ var UIController = ( function()
             }
         },
 
+        /* Name: addListItem: Add an item to the UI once the user enters an expense
+        Params:
+        - obj: The income/expense as an Object of type Income or Expense
+        - type: The type of expense: inc or exp
+        Return: None
+        */
         addListItem: function(obj, type) 
         {
             var html, newHtml, element;
+
             // Create HTML string with placeholder text
             if (type === 'inc')
             {
@@ -254,6 +328,7 @@ var UIController = ( function()
             element = DOMstrings.expensesContainer;
             html = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             }
+
             // Replace the placeholder text with data
             newHtml = html.replace('%id%', obj.id);
             newHtml = newHtml.replace('%description%', obj.description);
@@ -263,39 +338,56 @@ var UIController = ( function()
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
         },
 
+        /* Name: deleteListItem: Remove an element from the UI upon deletion
+        Params:
+        - selectorID: The ID of the item to delete
+        Return: None
+        */
         deleteListItem: function(selectorID)
         {
             var el = document.getElementById(selectorID);
             el.parentNode.removeChild(el);
         },
 
+        /* Name: clearFields: Clear the input fields enterred by the user upon submission of an expense
+        Params: None
+        Return: None
+        */
         clearFields: function()
         {
+            // Retrieving the DOM elements to be cleared
             var fields = document.querySelectorAll(DOMstrings.inputDescription + ',' + DOMstrings.inputValue);
             
-            // List -> Array
+            // List -> Array, creates a copy of the array equivalence in fieldsArr
             var fieldsArr = Array.prototype.slice.call(fields);
 
-            fieldsArr.forEach(function(current, index, array) {
+            // Iterating over the newly created Array, setting the value attribute to an empty string
+            fieldsArr.forEach(function(current) {
                 current.value = "";
             });
 
             // Set the focus of the fields back to the first one
             fieldsArr[0].focus();
-            
         },
 
+        /* Name: displayBudget: Sets the textContent of particular elements to the respective values,
+        retrieved from th
+        Params:
+        - Object containing all of the values calculated for the application such as totals
+        Return: None
+        */
         displayBudget: function(obj)
         {
+            // Determining the type of the income based on the current budget value
             var type;
             obj.budget > 0 ? type = 'inc' : type = 'exp';
 
-
+            // Setting the content of the DOM element text content
             document.querySelector(DOMstrings.budgetLabel).textContent = formatNumber(obj.budget, type);
             document.querySelector(DOMstrings.incomeLabel).textContent = formatNumber(obj.totalInc, 'inc');
             document.querySelector(DOMstrings.expensesLabel).textContent = formatNumber(obj.totalExp, 'exp');
             
-
+            // Formatting the appearance of the percentage
             if (obj.percentage > 0)
             {
                 document.querySelector(DOMstrings.percentageLabel).textContent = obj.percentage + '%';
@@ -304,10 +396,14 @@ var UIController = ( function()
             {
                 document.querySelector(DOMstrings.percentageLabel).textContent = '---';
             }
-
-
         },
 
+        /* Name: displayPercentages: Setting the DOM text content for the percentage of each of the 
+        entered Expenses
+        Params: 
+        - percentages: The list of percentages which are being assigned to the textContent of the expenses
+        Return: None
+        */
         displayPercentages: function(percentages)
         {
             var fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
@@ -326,6 +422,10 @@ var UIController = ( function()
             });
         },
 
+        /* Name: displayMonth - retrieving and formatting the date and displaying it within the respective DOM element
+        Params: None
+        Return: None
+        */
         displayMonth: function()
         {
             var now, month, year;
@@ -334,12 +434,15 @@ var UIController = ( function()
             months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
             month = now.getMonth();
 
-
             year = now.getFullYear();
             document.querySelector(DOMstrings.dateLabel).textContent = months[month] + ' ' + year;
-
         },
 
+        /* Name: changedType: A method to detect when a user switches between an Expense / Income, and as a result,
+        changing the highlighted input element colours between Red and Blue
+        Params: None
+        Return: None
+        */
         changedType: function() 
         {
             var fields = document.querySelectorAll(
@@ -353,8 +456,6 @@ var UIController = ( function()
             });
 
             document.querySelector(DOMstrings.inputBtn).classList.toggle('red');
-
-
         },
 
 
@@ -365,9 +466,14 @@ var UIController = ( function()
         }
     }
 } )();
-
+// END OF UI CONTROLLER
 
 // GLOBAL APP CONTROLLER
+/*
+Params:
+- budgetCtrl: The budget controller
+- UICtrl: The UI controller
+*/
 var controller = ( function(budgetCtrl, UICtrl) 
 {
     // setupEventListeners: Event Listeners are setup and added in this method
@@ -375,8 +481,10 @@ var controller = ( function(budgetCtrl, UICtrl)
     {
         var DOM = UICtrl.getDOMstrings();
 
+        // Trigger the event to add an item to the budget app
         document.querySelector(DOM.inputBtn).addEventListener('click', ctrlAddItem);
 
+        // Allows for user to press the Enter key to submit an expense
         document.addEventListener('keypress', function(event) {
             if (event.keyCode === 13 || event.which === 13)
             {
@@ -384,14 +492,18 @@ var controller = ( function(budgetCtrl, UICtrl)
             }
         });
 
-        // Event Delegation: all incomes and expenses will be assigned the event ctrlDeleteItem
+        // Event Delegation: all incomes and expenses (nested within DOM.container) will be assigned the event ctrlDeleteItem
         document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
 
+        // Triggers the change of colour on the input fields (Blue <-> Red) when switching between Expense / Income
         document.querySelector(DOM.inputType).addEventListener('change', UICtrl.changedType);
-
-
     };
 
+    /* Name: updateBudget: Calls the methods to calculate the budget, retrieve the budget, and finally
+    display the budget on the screen
+    Params: None
+    Return: None
+    */
     var updateBudget = function() 
     {
         // Calculate the budget
@@ -404,6 +516,10 @@ var controller = ( function(budgetCtrl, UICtrl)
         UICtrl.displayBudget(budget);
     };
 
+    /* Name: updatePercentages: Calls the methods to calculate the %, retrieve the % and then display the %
+    Params: None
+    Return: None
+    */
     var updatePercentages = function() 
     {
         // Calculate the percentages
@@ -416,7 +532,11 @@ var controller = ( function(budgetCtrl, UICtrl)
         UICtrl.displayPercentages(percentages);
     };
 
-    // ctrlAddItem: The main controller method facilitating the addition of an item to the application
+    /* Name: ctrlAddItem: Faciliates the addition of an element to the budget app. Methods are called from the
+    budget and UI controllers to allow for the values entered by the user to be added and displayed to the app.
+    Params: None
+    Return: None
+    */
     var ctrlAddItem = function() 
     {
         var input, newItem;
@@ -438,10 +558,15 @@ var controller = ( function(budgetCtrl, UICtrl)
             // Calculate the budget + display the budget
             updateBudget();
 
+            // Calculate the percentage and display to the screen
             updatePercentages();
         }
     };
 
+    /* Name: ctrlDeleteItem: Faciliates the deletion of an expense from the application
+    Params: event - this becomes available from any event triggered via 'addEventListener'
+    Return: None
+    */
     var ctrlDeleteItem = function(event) 
     {
         var itemID, splitID, type, id;
@@ -463,6 +588,7 @@ var controller = ( function(budgetCtrl, UICtrl)
             // Update and show the new budget
             updateBudget();
 
+            // Update and show the new percentages
             updatePercentages();
         }
     }
